@@ -1,0 +1,93 @@
+THIS IS CHECK ARGS 4, 1, 1
+Simulating a cache with 1 total lines; each line has 4 words
+Each set in the cache contains 1 lines; there are 1 sets
+$$$ transferring word [0-3] from the memory to the cache
+$$$ transferring word [0-0] from the cache to the processor
+$$$ transferring word [0-3] from the cache to nowhere
+$$$ transferring word [8-11] from the memory to the cache
+$$$ transferring word [11-11] from the cache to the processor
+$$$ transferring word [8-11] from the cache to nowhere
+$$$ transferring word [0-3] from the memory to the cache
+$$$ transferring word [1-1] from the cache to the processor
+$$$ transferring word [0-3] from the cache to nowhere
+$$$ transferring word [12-15] from the memory to the cache
+$$$ transferring word [12-12] from the cache to the processor
+$$$ transferring word [12-15] from the cache to nowhere
+$$$ transferring word [0-3] from the memory to the cache
+$$$ transferring word [2-2] from the cache to the processor
+$$$ transferring word [0-3] from the cache to nowhere
+$$$ transferring word [12-15] from the memory to the cache
+$$$ transferring word [13-13] from the cache to the processor
+$$$ transferring word [12-15] from the cache to nowhere
+$$$ transferring word [0-3] from the memory to the cache
+$$$ transferring word [3-3] from the cache to the processor
+$$$ transferring word [0-3] from the cache to nowhere
+$$$ transferring word [8-11] from the memory to the cache
+$$$ transferring word [11-11] from the processor to the cache
+$$$ transferring word [8-11] from the cache to the memory
+$$$ transferring word [4-7] from the memory to the cache
+$$$ transferring word [4-4] from the cache to the processor
+$$$ transferring word [4-7] from the cache to nowhere
+$$$ transferring word [12-15] from the memory to the cache
+$$$ transferring word [15-15] from the cache to the processor
+$$$ transferring word [12-15] from the cache to nowhere
+$$$ transferring word [4-7] from the memory to the cache
+$$$ transferring word [5-5] from the cache to the processor
+$$$ transferring word [6-6] from the cache to the processor
+$$$ transferring word [4-7] from the cache to nowhere
+$$$ transferring word [12-15] from the memory to the cache
+$$$ transferring word [14-14] from the cache to the processor
+$$$ transferring word [12-15] from the cache to nowhere
+$$$ transferring word [4-7] from the memory to the cache
+$$$ transferring word [7-7] from the cache to the processor
+$$$ transferring word [4-7] from the cache to nowhere
+$$$ transferring word [12-15] from the memory to the cache
+$$$ transferring word [13-13] from the cache to the processor
+$$$ transferring word [12-15] from the cache to nowhere
+$$$ transferring word [8-11] from the memory to the cache
+$$$ transferring word [8-8] from the cache to the processor
+$$$ transferring word [9-9] from the cache to the processor
+$$$ transferring word [8-11] from the cache to nowhere
+$$$ transferring word [0-3] from the memory to the cache
+$$$ transferring word [3-3] from the processor to the cache
+$$$ transferring word [0-3] from the cache to the memory
+$$$ transferring word [8-11] from the memory to the cache
+$$$ transferring word [10-10] from the cache to the processor
+machine halted
+total of 11 instructions executed
+final state of machine:
+
+@@@
+state:
+	pc 11
+	memory:
+		mem[ 0 ] 8454155
+		mem[ 1 ] 8519692
+		mem[ 2 ] 8454157
+		mem[ 3 ] 370
+		mem[ 4 ] 8454159
+		mem[ 5 ] 655361
+		mem[ 6 ] 8585230
+		mem[ 7 ] 8519693
+		mem[ 8 ] 655361
+		mem[ 9 ] 12779523
+		mem[ 10 ] 25165824
+		mem[ 11 ] 2
+		mem[ 12 ] 2
+		mem[ 13 ] 2
+		mem[ 14 ] 370
+		mem[ 15 ] 17
+	registers:
+		reg[ 0 ] 0
+		reg[ 1 ] 21
+		reg[ 2 ] 2
+		reg[ 3 ] 370
+		reg[ 4 ] 0
+		reg[ 5 ] 0
+		reg[ 6 ] 0
+		reg[ 7 ] 0
+end state
+Main memory words accessed: 76
+End of run statistics:
+hits 2, misses 17, writebacks 2
+0 dirty cache blocks left

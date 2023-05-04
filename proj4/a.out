@@ -1,0 +1,74 @@
+Simulating a cache with 4 total lines; each line has 2 words
+Each set in the cache contains 2 lines; there are 2 sets
+$$$ transferring word [0-1] from the memory to the cache
+$$$ transferring word [0-0] from the cache to the processor
+$$$ transferring word [8-9] from the memory to the cache
+$$$ transferring word [9-9] from the cache to the processor
+$$$ transferring word [1-1] from the cache to the processor
+$$$ transferring word [10-11] from the memory to the cache
+$$$ transferring word [10-10] from the cache to the processor
+$$$ transferring word [2-3] from the memory to the cache
+$$$ transferring word [2-2] from the cache to the processor
+$$$ transferring word [3-3] from the cache to the processor
+$$$ transferring word [11-11] from the processor to the cache
+$$$ transferring word [8-9] from the cache to nowhere
+$$$ transferring word [4-5] from the memory to the cache
+$$$ transferring word [4-4] from the cache to the processor
+$$$ transferring word [0-1] from the cache to nowhere
+$$$ transferring word [12-13] from the memory to the cache
+$$$ transferring word [12-12] from the cache to the processor
+$$$ transferring word [5-5] from the cache to the processor
+$$$ transferring word [13-13] from the cache to the processor
+$$$ transferring word [2-3] from the cache to nowhere
+$$$ transferring word [6-7] from the memory to the cache
+$$$ transferring word [6-6] from the cache to the processor
+$$$ transferring word [7-7] from the cache to the processor
+$$$ transferring word [10-11] from the cache to the memory
+$$$ transferring word [14-15] from the memory to the cache
+$$$ transferring word [14-14] from the processor to the cache
+$$$ transferring word [4-5] from the cache to nowhere
+$$$ transferring word [8-9] from the memory to the cache
+$$$ transferring word [8-8] from the cache to the processor
+machine halted
+total of 9 instructions executed
+final state of machine:
+
+@@@
+state:
+	pc 9
+	memory:
+		mem[ 0 ] 8454153
+		mem[ 1 ] 8519690
+		mem[ 2 ] 655363
+		mem[ 3 ] 12779531
+		mem[ 4 ] 8650764
+		mem[ 5 ] 8716301
+		mem[ 6 ] 6619142
+		mem[ 7 ] 12976142
+		mem[ 8 ] 25165824
+		mem[ 9 ] 2
+		mem[ 10 ] 3
+		mem[ 11 ] 5
+		mem[ 12 ] 4
+		mem[ 13 ] 5
+		mem[ 14 ] 0
+	registers:
+		reg[ 0 ] 0
+		reg[ 1 ] 2
+		reg[ 2 ] 3
+		reg[ 3 ] 5
+		reg[ 4 ] 4
+		reg[ 5 ] 5
+		reg[ 6 ] -6
+		reg[ 7 ] 0
+end state
+
+cache:
+	set 0:
+		[ 0 ]: { 4 5 }
+		[ 1 ]: { 25165824 2 }
+	set 1:
+		[ 0 ]: { -6 0 }
+		[ 1 ]: { 6619142 12976142 }
+end cache
+$$$ Main memory words accessed: 20
