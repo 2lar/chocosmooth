@@ -243,6 +243,8 @@ int main(int argc, char *argv[]) {
                      }
                   }
                }
+               printf("THIS IS TEXT OFFSET: %d, temp: %d, size: %d\n", text_offset, temp, size);
+               printf("This is change: %d\n", change(text_offset, temp + size));
                files[i].text[reloc_offset] = change(text_offset, temp + size);
             }
             // if global label

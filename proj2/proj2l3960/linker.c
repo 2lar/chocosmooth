@@ -289,13 +289,18 @@ int main(int argc, char *argv[])
                 }
                 else{//for the locals 
 					printf("	LWSW LOCALS	\n");
-					printf("THIS IS BEFORE: %d\n", files[i].text[files[i].relocTable[j].offset]);
+					printf("THIS IS BEFORE: %d\n", files[i].text[files[i].relocTable[j].offset]); //offset error
+
+					printf("this is before 293\n");
 					if ((files[i].text[files[i].relocTable[j].offset]&0xFFFF) < files[i].textSize){
+						printf("it goes in 295\n");
 						files[i].text[files[i].relocTable[j].offset] += files[i].textStartingLine;
 						
 					}
 					// D
 					else{
+						printf("in the else\n");
+						printf("THIS IS VALUE TO OFFSET: %d\n", (combiner.textSize - files[i].textSize) + files[i].dataStartingLine);
 						files[i].text[files[i].relocTable[j].offset] += (combiner.textSize - files[i].textSize) + files[i].dataStartingLine;
 					}
 					printf("THIS IS after: %d\n", files[i].text[files[i].relocTable[j].offset]);
