@@ -156,18 +156,19 @@ int main(int argc, char *argv[])
 
 	for (int i = 0, j = 0; j < argc - 2; j++) {
 		files[j].textStartingLine = i;
-		printf("THIS IS SIZE: %d\n", files[j].textSize);
+		printf("THIS IS SIZE1: %d\n", files[j].textSize);
 		for (int  a = 0; a < files[j].textSize; a++, i++) {
 			combiner.text[i] = files[j].text[a];
 			combiner.textSize++;
 		}
 	}
 	printf("THIS IS SIZE: %d\n", combiner.textSize);
-	
+	files[0].dataStartingLine = combiner.textSize;
 	for (int i = 0, j = 0; j < argc - 2; j++) {
-		files[j].dataStartingLine = i;
+		printf("this is: %d\n", argc - 2);
 		for (int  a = 0; a < files[j].dataSize; a++, i++) {
-			combiner.data[i] = files[j].data[a];
+			combiner.data[i] = files[j].data[a] + files[j].textSize;
+			printf("this is combiner data after: %d ---------------------\n", combiner.data[i]);
 			combiner.dataSize++;
 		}
 	}
@@ -192,7 +193,7 @@ int main(int argc, char *argv[])
 				printf("THIS IS THE COMPONENTS: %d; %d; %d\n", files[i].symbolTable[j].offset, tempdata, combiner.textSize);
 				printf("THIS IS OFFSETS: %d\n", combiner.symTable[combiner.symTableSize].offset);
 				combiner.symTable[combiner.symTableSize].offset = files[i].symbolTable[j].offset + combiner.textSize + tempdata;
-			}
+			} //for test1 it needs to be +11 by +3, but it is currently +1
 			else {
 				combiner.symTable[combiner.symTableSize].offset = files[i].symbolTable[j].offset + temptext;
 				
@@ -200,9 +201,15 @@ int main(int argc, char *argv[])
             combiner.symTableSize++;
             t++;
 			
+			//moved above
+			printf("this is added offset: %d\n", files[i].symbolTable[j].offset);
+			printf("this is the datasize: %d\n", files[i].dataSize);
+			// tempdata += files[i].symbolTable[j].offset + files[t].dataSize;
+			// temptext += files[i].symbolTable[j].offset + files[t].textSize;
+			// temptext += files[t].textSize;
         }
-		tempdata += files[t].dataSize;
-		temptext += files[t].textSize;
+		tempdata += files[i].dataSize;
+		temptext += files[i].textSize;
     }
 
     printf("%d %d %d %d\n", combiner.textSize, combiner.dataSize, combiner.symTableSize, combiner.relocTableSize);
@@ -218,6 +225,8 @@ int main(int argc, char *argv[])
             if (!strcmp(files[i].relocTable[j].inst, ".fill")){
                 if (isupper(combiner.relocTable[j].label[0])){
 					printf("	FILL GLOBALS	\n");
+					// if fill add on data for stack offset else add text. or add stack offset to data and to text if not
+					// add to text if not fill global stack
 					printf("THIS IS BEFORE: %d\n", files[i].text[files[i].relocTable[j].offset]);
 					int big = 0;
 					for (int k = 0; k < combiner.symTableSize; k++) {
@@ -245,18 +254,50 @@ int main(int argc, char *argv[])
 					printf("	FILL LOCALS	\n");
 					printf("THIS IS BEFORE: %d and %d\n", files[i].text[files[i].relocTable[j].offset], files[i].relocTable[j].offset);
 					if ((files[i].data[files[i].relocTable[j].offset]&0xFFFF) < files[i].textSize){
-						files[i].data[files[i].relocTable[j].offset] += files[i].textStartingLine;
+						printf("+++++++++++++++++++++++++++++++++++++++++BEFORE: %d\n", files[i].data[files[i].relocTable[j].offset]);
+						files[i].data[files[i].relocTable[j].offset] += files[i].dataStartingLine;
+						printf("+++++++++++++++++++++++++++++++++++++++++after1: %d\n", files[i].data[files[i].relocTable[j].offset]);
+						printf("in here 1\n");
 					}
 					// lD
 					else{
 						printf("in the d\n");
 						// printf("THESE ARE COMPONENTS: %d; %d; %d; %d\n");
 						files[i].data[files[i].relocTable[j].offset] += (combiner.textSize - files[i].textSize) + files[i].dataStartingLine;
+						// 6/1 modify of ths line
+						// files[i].data[files[i].relocTable[j].offset] -= files[i].relocTable[j].offset;
 					}
 					printf("THIS IS after: %d\n", files[i].text[files[i].relocTable[j].offset]);
                 }
             }
             else{// lw sw
+                if (isupper(combiner.relocTable[j].label[0])){
+					printf("	FILL GLOBALS	\n");
+					// if fill add on data for stack offset else add text. or add stack offset to data and to text if not
+					// add to text if not fill global stack
+					printf("THIS IS BEFORE: %d\n", files[i].text[files[i].relocTable[j].offset]);
+					int big = 0;
+					for (int k = 0; k < combiner.symTableSize; k++) {
+						if (strcmp(combiner.symTable[k].label, files[i].relocTable[j].label) == 0) {
+							printf("THIS IS K: %d\n", k);
+							big = k;
+							break;
+						}
+					}
+					if (big == combiner.symTableSize){
+						if (!strcmp(files[i].relocTable[j].label,"Stack")){
+							files[i].data[files[i].relocTable[j].offset] = combiner.dataSize + combiner.textSize;
+						}
+						else {
+							printf("Undefined global label used in .fill: %s\n",files[i].relocTable[j].label);
+							exit(1);
+						}
+					}
+					else{
+						files[i].data[files[i].relocTable[j].offset] += offglobal(combiner.relocTable[j].label, files, combiner, i, (argc - 2), j, big);
+					}
+					printf("THIS IS after: %d\n", files[i].text[files[i].relocTable[j].offset]);
+                }
 				printf("this is label check: %s\n", files[i].relocTable[j].label);
                 if (isupper(files[i].relocTable[j].label[0])){
 					printf("	SWKW GLOBALS	\n");
@@ -274,7 +315,9 @@ int main(int argc, char *argv[])
 					if (big == combiner.symTableSize){
 						printf("HERE1\n");
 						if (!strcmp(files[i].relocTable[j].label,"Stack")){
-							files[i].data[files[i].relocTable[j].offset] += combiner.dataSize + combiner.textSize;
+							printf("312: %d, %d, %d\n", files[i].data[files[i].relocTable[j].offset], combiner.dataSize, combiner.textSize);
+							files[i].text[files[i].relocTable[j].offset] += combiner.dataSize + combiner.textSize;
+							// printf("this is after")
 						}
 						else {
 							printf("Undefined global label used in lw/sw aya: %s\n",files[i].relocTable[j].label);
@@ -313,10 +356,12 @@ int main(int argc, char *argv[])
 		for (int i = 0; i < files[k].textSize; i++)
 		{
 			combiner.text[tsize + i] = files[k].text[i];
+			printf("THIS IS: %d\n", combiner.text[tsize + i]);
 		}
 		for (int i = 0; i < files[k].dataSize; i++)
 		{
 			combiner.data[dsize + i] = files[k].data[i];
+			printf("THIS IS DATA [%d]: %d\n", i, files[k].data[i]);
 		}
 		tsize += files[k].textSize;
 		dsize += files[k].dataSize;
@@ -347,7 +392,8 @@ int offglobal(char* label, FileData files[MAXFILES], CombinedFiles combiner, int
 		if (small == files[i].symbolTableSize) exit(1);
 	}
 	if (files[i].symbolTable[small].location == 'D'){
-		temp = files[i].text[files[i].relocTable[j].offset] + combiner.symTable[big].offset - (files[i].textSize + (files[i].symbolTable[small].offset & 0xFFFF)) + i;
+		printf("THIS IS DHSVDGSHABDGYSAUDSAHDGSADHAS: %d", j);
+		temp = files[i].text[files[i].relocTable[j].offset] + combiner.symTable[big].offset - (files[i].textSize + (files[i].symbolTable[small].offset & 0xFFFF)) + i - j;
 	}
 	else{
 		printf("IN T\n");

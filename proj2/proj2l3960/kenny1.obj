@@ -1,0 +1,22 @@
+7 2 5 7
+12779520
+8585223
+12779520
+12713987
+8650755
+8519680
+25165824
+123
+4
+CJ T 6
+Hello D 0
+Town D 1
+Stack U 0
+Fill U 0
+0 sw Stack
+1 lw Hello
+2 sw Stack
+3 sw bumpy
+4 lw bumpy
+5 lw Fill
+1 .fill cool

@@ -7,10 +7,10 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug",
+            "name": "P2l",
             "program": "${workspaceFolder}/proj2/proj2l3960/linker",
-            "args": ["glob.obj", "glob.mc"],
-            "cwd": "${workspaceFolder}"
+            "args": ["test1_0.obj", "test1_1.obj", "test1final.mc"],
+            "cwd": "${workspaceFolder}/proj2/proj2l3960/"
         }
     ]
 }

@@ -1,0 +1,24 @@
+6 3 5 9
+8650753
+12779520
+8519686
+8519685
+12648453
+8454144
+0
+0
+1
+Cogs T 0
+Toon T 1
+CEO T 2
+CFO D 0
+VP U 0
+0 lw Toon
+1 sw Town
+2 lw CFO
+3 lw gag
+4 sw gag
+5 lw VP
+0 .fill VP
+1 .fill Cogs
+2 .fill Toon

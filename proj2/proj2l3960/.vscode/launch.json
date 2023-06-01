@@ -7,9 +7,9 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug",
+            "name": "p2l",
             "program": "${workspaceFolder}/linker",
-            "args": ["glob.obj", "glob.mc"],
+            "args": ["kenny0.obj", "kenny1.obj", "kenny3.obj", "kennyout.mc"],
             "cwd": "${workspaceFolder}"
         }
     ]
