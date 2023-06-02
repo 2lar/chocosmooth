@@ -34,8 +34,8 @@ struct FileData {
 	int dataSize;
 	int symbolTableSize;
 	int relocationTableSize;
-	int textStartingLine; // in final executable
-	int dataStartingLine; // in final executable
+	int textStartingLine; // in combiner executable
+	int dataStartingLine; // in combiner executable
 	int text[MAXSIZE];
 	int data[MAXSIZE];
 	SymbolTableEntry symbolTable[MAXSIZE];
@@ -148,32 +148,32 @@ int main(int argc, char *argv[])
 	//    Happy coding!!!
 
 	int numFiles = argc - 2;
-	CombinedFiles final;
+	CombinedFiles combiner;
 
 	// set up starting lines
-	final.textSize = 0;
+	combiner.textSize = 0;
 	for(int i = 0; i < numFiles; ++i){
-		files[i].textStartingLine = final.textSize;
-		final.textSize += files[i].textSize;
+		files[i].textStartingLine = combiner.textSize;
+		combiner.textSize += files[i].textSize;
 	}
 
-	final.dataSize = 0;
+	combiner.dataSize = 0;
 	for(int i = 0; i < numFiles; ++i){
-		files[i].dataStartingLine = final.dataSize + final.textSize;
-		final.dataSize += files[i].dataSize;
+		files[i].dataStartingLine = combiner.dataSize + combiner.textSize;
+		combiner.dataSize += files[i].dataSize;
 	}
 
 	//check for duplicate globals
-	final.symTableSize = 0;
+	combiner.symTableSize = 0;
 	int currTextLine = 0;
 	int currDataLine = 0;
-	SymbolTableEntry undefSyms[MAXSIZE];
-	int undefSize = 0;
+	SymbolTableEntry Utable[MAXSIZE];
+	int uind = 0;
 
 	for(int i = 0; i < numFiles; ++i){
 		for(int j = 0; j < files[i].symbolTableSize; ++j){
-			for(int k = 0; k < final.symTableSize; ++k){
-				if(files[i].symbolTable[j].location != 'U' && !strcmp(files[i].symbolTable[j].label, final.symTable[k].label)){
+			for(int k = 0; k < combiner.symTableSize; ++k){
+				if(files[i].symbolTable[j].location != 'U' && !strcmp(files[i].symbolTable[j].label, combiner.symTable[k].label)){
 					printf("Duplicate Label");
 					exit(1);
 				}
@@ -185,23 +185,23 @@ int main(int argc, char *argv[])
 			}
 
 			if(files[i].symbolTable[j].location == 'T'){
-				final.symTable[final.symTableSize].location = files[i].symbolTable[j].location;
-				final.symTable[final.symTableSize].offset = currTextLine + files[i].symbolTable[j].offset;
+				combiner.symTable[combiner.symTableSize].location = files[i].symbolTable[j].location;
+				combiner.symTable[combiner.symTableSize].offset = currTextLine + files[i].symbolTable[j].offset;
 
-				strcpy(final.symTable[final.symTableSize].label, files[i].symbolTable[j].label);
-				++final.symTableSize;
+				strcpy(combiner.symTable[combiner.symTableSize].label, files[i].symbolTable[j].label);
+				++combiner.symTableSize;
 			}
 			else if(files[i].symbolTable[j].location == 'D'){
-				final.symTable[final.symTableSize].location = files[i].symbolTable[j].location;
-				final.symTable[final.symTableSize].offset = currDataLine + files[i].symbolTable[j].offset;
+				combiner.symTable[combiner.symTableSize].location = files[i].symbolTable[j].location;
+				combiner.symTable[combiner.symTableSize].offset = currDataLine + files[i].symbolTable[j].offset;
 
-				strcpy(final.symTable[final.symTableSize].label, files[i].symbolTable[j].label);
-				++final.symTableSize;
+				strcpy(combiner.symTable[combiner.symTableSize].label, files[i].symbolTable[j].label);
+				++combiner.symTableSize;
 			}
 			else if(files[i].symbolTable[j].location == 'U'){
-				undefSyms[undefSize].location = files[i].symbolTable[j].location;
-				strcpy(undefSyms[undefSize].label, files[i].symbolTable[j].label);
-				++undefSize;
+				Utable[uind].location = files[i].symbolTable[j].location;
+				strcpy(Utable[uind].label, files[i].symbolTable[j].label);
+				++uind;
 			}
 			else{
 				printf("Unrecognized Location");
@@ -213,16 +213,16 @@ int main(int argc, char *argv[])
 	}
 
 	// define [Stack] label
-	strcpy(final.symTable[final.symTableSize].label, "Stack");
-	final.symTable[final.symTableSize].location = 'D';
-	final.symTable[final.symTableSize].offset = final.textSize + final.dataSize; // inconsistent location
-	++final.symTableSize;
+	strcpy(combiner.symTable[combiner.symTableSize].label, "Stack");
+	combiner.symTable[combiner.symTableSize].location = 'D';
+	combiner.symTable[combiner.symTableSize].offset = combiner.textSize + combiner.dataSize; // inconsistent location
+	++combiner.symTableSize;
 
 	// check for undefined labels
-	for(int i = 0; i < undefSize; ++i){
+	for(int i = 0; i < uind; ++i){
 		int def = 0;
-		for(int j = 0; j < final.symTableSize; ++j){
-			if(!strcmp(undefSyms[i].label, final.symTable[j].label)){
+		for(int j = 0; j < combiner.symTableSize; ++j){
+			if(!strcmp(Utable[i].label, combiner.symTable[j].label)){
 				def = 1;
 			}
 		}
@@ -236,16 +236,16 @@ int main(int argc, char *argv[])
 	int index2 = 0;
 	for(int i = 0; i < numFiles; ++i){
 		for(int j = 0; j < files[i].textSize; ++j){
-			final.text[index1] = files[i].text[j];
+			combiner.text[index1] = files[i].text[j];
 			++index1;
 		}
 		for(int k = 0; k < files[i].dataSize; ++k){
-			final.data[index2] = files[i].data[k];
+			combiner.data[index2] = files[i].data[k];
 			++index2;
 		}
 	}
 	// Checking
-	if(index1 != final.textSize || index2 != final.dataSize){
+	if(index1 != combiner.textSize || index2 != combiner.dataSize){
 		printf("Mismatch Sizes");
 		exit(1);
 	}
@@ -256,26 +256,26 @@ int main(int argc, char *argv[])
 			// check if stack
 			unsigned short int offset = 0;
 			if(!strcmp(files[i].relocTable[j].label, "Stack")){
-				offset = final.textSize + final.dataSize;
+				offset = combiner.textSize + combiner.dataSize;
 				if(!strcmp(files[i].relocTable[j].inst, ".fill")){
 					// datastartline goes to far
-					final.data[files[i].dataStartingLine - final.textSize + files[i].relocTable[j].offset] += offset;
+					combiner.data[files[i].dataStartingLine - combiner.textSize + files[i].relocTable[j].offset] += offset;
 				}
 				else{
-					final.text[files[i].textStartingLine + files[i].relocTable[j].offset] += offset;
+					combiner.text[files[i].textStartingLine + files[i].relocTable[j].offset] += offset;
 				}
 				// move on
 				continue;
 			}
 			// check if global 
 			if(files[i].relocTable[j].label[0] <= 'Z' && files[i].relocTable[j].label[0] >= 'A'){
-				for(int k = 0; k < final.symTableSize; ++k){
-					if(!strcmp(final.symTable[k].label, files[i].relocTable[j].label)){
-						if(final.symTable[k].location == 'T'){
-							offset = final.symTable[k].offset;
+				for(int k = 0; k < combiner.symTableSize; ++k){
+					if(!strcmp(combiner.symTable[k].label, files[i].relocTable[j].label)){
+						if(combiner.symTable[k].location == 'T'){
+							offset = combiner.symTable[k].offset;
 						}
-						else if(final.symTable[k].location == 'D'){
-							offset = final.symTable[k].offset + final.textSize;
+						else if(combiner.symTable[k].location == 'D'){
+							offset = combiner.symTable[k].offset + combiner.textSize;
 						}
 					}
 				}
@@ -303,22 +303,22 @@ int main(int argc, char *argv[])
 			unsigned short int replace = 0;
 			if(!strcmp(files[i].relocTable[j].inst, ".fill")){
 				// dataStartingLine goes too far
-				final.data[files[i].relocTable[j].offset + files[i].dataStartingLine - final.textSize] = offset;
+				combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize] = offset;
 			}
 			else{ // lw and sw instructions
-				replace = final.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF;
-				final.text[files[i].relocTable[j].offset + files[i].textStartingLine] -= replace;
-				final.text[files[i].relocTable[j].offset + files[i].textStartingLine] += offset;
+				replace = combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF;
+				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] -= replace;
+				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] += offset;
 			}
 		}
 	}
 
 	//print to file
-	for(int i = 0; i < final.textSize; ++i){
-		fprintf(outFilePtr, "%d\n", final.text[i]);
+	for(int i = 0; i < combiner.textSize; ++i){
+		fprintf(outFilePtr, "%d\n", combiner.text[i]);
 	}
-	for(int j = 0; j < final.dataSize; ++j){
-		fprintf(outFilePtr, "%d\n", final.data[j]);
+	for(int j = 0; j < combiner.dataSize; ++j){
+		fprintf(outFilePtr, "%d\n", combiner.data[j]);
 	}
 
 	fclose(outFilePtr);

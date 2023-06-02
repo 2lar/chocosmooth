@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
 #define MAXSIZE 300
 #define MAXLINELENGTH 1000
@@ -172,7 +171,7 @@ int main(int argc, char *argv[])
 
 	SymbolTableEntry Utable[MAXSIZE];
 	int tempdata = 0, temptext = 0, uind = 0;
-    for (int i = 0; i < argc - 2; i++){
+    for (int t = 0, i = 0; i < argc - 2; i++){
         for (int j = 0; j < files[i].symbolTableSize; j++){
 			for (int a = 0; a < combiner.symTableSize; a++){
 				if (!strcmp(combiner.symTable[a].label, files[i].symbolTable[j].label) && files[i].symbolTable[j].location != 'U'){
@@ -190,6 +189,7 @@ int main(int argc, char *argv[])
 				uind++;
 			}
 			else{
+				
 				if (files[i].symbolTable[j].location == 'D'){
 					printf("THIS IS THE COMPONENTS: %d; %d; %d\n", files[i].symbolTable[j].offset, tempdata, combiner.textSize);
 					printf("THIS IS OFFSETS: %d\n", combiner.symTable[combiner.symTableSize].offset);
@@ -211,67 +211,53 @@ int main(int argc, char *argv[])
 		temptext += files[i].textSize;
     }
 
-	// The stack array starts at the implicit label Stack and extends to larger addresses,
-	// which is why the linker inserts the Stack label as the last line in the final executable..
-	strcpy(combiner.symTable[combiner.symTableSize].label, "Stack");
-	combiner.symTable[combiner.symTableSize].location = 'D';
-	combiner.symTable[combiner.symTableSize].offset = combiner.textSize + combiner.dataSize;
-	combiner.symTableSize++;
-
-	for(int i = 0; i < uind; ++i){
-		int findone = 0;
-		for(int j = 0; j < combiner.symTableSize; ++j){
+	for(int i = 0, def = 0; i < uind; i++){
+		for(int j = 0; j < combiner.symTableSize; j++){
 			if(!strcmp(Utable[i].label, combiner.symTable[j].label)){
-				findone = 1;
+				def = 1;
 			}
 		}
-		if(!findone){
-			printf("Undefined label\n");
+		if(!def){
+			printf("Undefined label");
 			exit(1);
 		}
 	}
 
-	for (int tsize = 0, dsize = 0, k = 0; k < argc - 2; k++){
-		for (int i = 0; i < files[k].textSize; i++)
-		{
-			combiner.text[tsize + i] = files[k].text[i];
-			printf("THIS IS: %d\n", combiner.text[tsize + i]);
+	for (int i = 0, din = 0, tin = 0; i < argc - 2; i++){
+		for(int j = 0; j < files[i].textSize; ++j){
+			combiner.text[tin++] = files[i].text[j];
 		}
-		for (int i = 0; i < files[k].dataSize; i++)
-		{
-			combiner.data[dsize + i] = files[k].data[i];
-			printf("this is i and j: %d and %d\n", i, j);
-			printf("THIS IS DATA [%d]: %d\n", i, files[k].data[i]);
-		}
-		tsize += files[k].textSize;
-		dsize += files[k].dataSize;
+		for(int k = 0; k < files[i].dataSize; ++k){
+			combiner.data[din++] = files[i].data[k];
+		}	
 	}
 
     printf("%d %d %d %d\n", combiner.textSize, combiner.dataSize, combiner.symTableSize, combiner.relocTableSize);
-	for (int i = 0; i < combiner.symTableSize; i++){
+	for (int i =0; i < combiner.symTableSize; i++){
 		printf("THIS IS offset at %d: %d at %s\n", i, combiner.symTable[i].offset, combiner.symTable[i].label);
 	}
 
 	for (int i = 0; i < argc - 2; i++){
 		for (int j = 0; j < files[i].relocationTableSize; j++){
 			int relocoff = 0;
-			if (isupper(files[i].relocTable[j].label[0])){ //GLOBAL
-				if(!strcmp(files[i].relocTable[j].label, "Stack")){
-					relocoff = combiner.textSize + combiner.dataSize;
-					if(!strcmp(files[i].relocTable[j].inst, ".fill")){
-						printf("in the stack fill\n");
-						printf("this is i and j: %d and %d\n", i , j);
-						printf("this is combiner data %d\n", combiner.data[files[i].dataStartingLine - combiner.textSize + files[i].relocTable[j].offset]);
-						combiner.data[files[i].dataStartingLine - combiner.textSize + files[i].relocTable[j].offset] += relocoff;
-						printf("this is combiner data %d\n", combiner.data[files[i].dataStartingLine - combiner.textSize + files[i].relocTable[j].offset]);
-					}
-					else{
-						printf("in the not stack fill\n");
-						combiner.text[files[i].textStartingLine + files[i].relocTable[j].offset] += relocoff;
-					}
-					printf("ths wil continue\n");
-					continue;
+			if(!strcmp(files[i].relocTable[j].label, "Stack")){
+				relocoff = combiner.textSize + combiner.dataSize;
+				if(!strcmp(files[i].relocTable[j].inst, ".fill")){
+                    printf("in the stack fill\n");
+                    printf("this is i and j: %d and %d\n", i , j);
+                    printf("this is combiner data %d\n", combiner.data[files[i].dataStartingLine - combiner.textSize + files[i].relocTable[j].offset]);
+					combiner.data[files[i].dataStartingLine - combiner.textSize + files[i].relocTable[j].offset] += relocoff;
+                    printf("this is combiner data %d\n", combiner.data[files[i].dataStartingLine - combiner.textSize + files[i].relocTable[j].offset]);
 				}
+				else{
+                    printf("in the not stack fill\n");
+					combiner.text[files[i].textStartingLine + files[i].relocTable[j].offset] += relocoff;
+				}
+				printf("ths wil continue\n");
+				continue;
+			}
+			
+			if ((files[i].relocTable[j].label[0] <= 'Z' && files[i].relocTable[j].label[0] >= 'A')){ //GLOBAL
 				for (int k = 0; k < combiner.symTableSize; k++){
 					if (!strcmp(combiner.symTable[k].label, files[i].relocTable[j].label)){
 						if(combiner.symTable[k].location == 'T'){
@@ -298,27 +284,35 @@ int main(int argc, char *argv[])
 					relocoff = offloc + files[i].dataStartingLine - files[i].textSize;
 				}
 			}
+			unsigned short int replace = 0;
 			if(!strcmp(files[i].relocTable[j].inst, ".fill")){
+				// dataStartingLine goes too far
 				combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize] = relocoff;
                 printf("in the .fill %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
 			}
-			else{ //LW AND SW
+			else{ // lw and sw instructions
                 printf("this is else %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
+				replace = combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF;
+                printf("replcacefsdhjfvs: %d\n", replace);
+                printf("replcacefsdhjfvs: %d\n", relocoff);
                 printf("replcacefsdhjfvs: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
-				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] = combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] - (combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF) + relocoff;
+				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] -= replace;
+				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] += relocoff;
 			}
             printf("THIS AFTERE: %d\n", files[i].text[files[i].relocTable[j].offset]);
             printf("THIS IS adter: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
 		}
 	}
+		//print to file
+	for(int i = 0; i < combiner.textSize; ++i){
+		fprintf(outFilePtr, "%d\n", combiner.text[i]);
+	}
+	for(int j = 0; j < combiner.dataSize; ++j){
+        printf("this is i and j: %d and %d\n", i , j);
+        printf("%d\n", combiner.data[j]);
+		fprintf(outFilePtr, "%d\n", combiner.data[j]);
+	}
 
-	for (int i = 0; i < combiner.textSize; i++)
-	{
-		fprintf(outFilePtr,"%d\n",combiner.text[i]);
-		// fprintf(outFilePtr,"%d\n", 999);
-	}
-	for (int i = 0; i < combiner.dataSize; i++)
-	{
-		fprintf(outFilePtr,"%d\n",combiner.data[i]);
-	}
+	fclose(outFilePtr);
+	return(0);
 } // main
