@@ -1,0 +1,22 @@
+6 4 3 8
+8454144
+8519686
+8585223
+8716296
+8650761
+25165824
+0
+0
+2
+13
+Fire D 2
+Sect D 3
+Lost U 0
+0 lw Stack
+1 lw water
+2 lw stack
+3 lw Fire
+4 lw Sect
+0 .fill main
+1 .fill Lost
+2 .fill earth

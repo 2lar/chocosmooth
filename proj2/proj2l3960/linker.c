@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 			}
 		}
 		if(!findone){
-			printf("Undefined label\n");
+			printf("Undefined label %s\n", Utable[i].label);
 			exit(1);
 		}
 	}

@@ -7,4 +7,3 @@ start   jalr    1   2
 done    halt
 max     .fill   5
 initia .fill   1
-Sub     .fill 0

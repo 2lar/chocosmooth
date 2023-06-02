@@ -565,7 +565,7 @@ forI(char *opcode, char *reg0, char *reg1, char *offset, int pc, int tlabels, ch
         }
 
         //no offset
-        printf("ERROR CANT FIND LABEL\n");
+        printf("ERROR CANT FIND LABEL %s\n", opcode);
         exit(1);
     }//end else if
     return mc;
