@@ -171,15 +171,15 @@ int main(int argc, char *argv[])
 
 	SymbolTableEntry Utable[MAXSIZE];
 	int tempdata = 0, temptext = 0, uind = 0;
-    for (int t = 0, i = 0; i < argc - 2; i++){
+    for (int i = 0; i < argc - 2; i++){
         for (int j = 0; j < files[i].symbolTableSize; j++){
 			for (int a = 0; a < combiner.symTableSize; a++){
-				if (!strcmp(combiner.symTable[a].label, files[i].symbolTable[j].label) && combiner.symTable[a].location != 'U'){
+				if (!strcmp(combiner.symTable[a].label, files[i].symbolTable[j].label) && files[i].symbolTable[j].location != 'U'){
 					printf("Duplicated defined global label.\n");
 					exit(1);
 				}  
             }
-            if (!strcmp(files[i].symbolTable[j].label, "Stack") && combiner.symTable[a].location != 'U'){
+            if (!strcmp(files[i].symbolTable[j].label, "Stack") && files[i].symbolTable[j].location != 'U'){
                 printf("Stack defined by object file.\n");
                 exit(1);
             }
@@ -239,10 +239,11 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < argc - 2; i++){
 		for (int j = 0; j < files[i].relocationTableSize; j++){
-			int relocoff = 0, big = 0, small = 0;
+			// int relocoff = 0, big = 0;
+			int big = 0;
 			if ((files[i].relocTable[j].label[0] <= 'Z' && files[i].relocTable[j].label[0] >= 'A')){ //GLOBAL
-				for (int k = 0; k < combiner.symTableSize; k++){
-					if (!strcmp(combiner.symTable[k].label, files[i].relocTable[j].label)) {
+				for (int k = 0; k < combiner.symTableSize; k++) {
+					if (strcmp(combiner.symTable[k].label, files[i].relocTable[j].label) == 0) {
 						printf("THIS IS K: %d\n", k);
 						big = k;
 						break;
@@ -250,52 +251,91 @@ int main(int argc, char *argv[])
 				}
 				if (big == combiner.symTableSize){
 					if (!strcmp(files[i].relocTable[j].label,"Stack")){
+						if (!strcmp(files[i].relocTable[j].inst,".fill")){
 							files[i].data[files[i].relocTable[j].offset] = combiner.dataSize + combiner.textSize;
 						}
+						else{
+							files[i].text[files[i].relocTable[j].offset] = combiner.dataSize + combiner.textSize;
+						}
+					}
 					else {
 						printf("Undefined global label used in .fill: %s\n",files[i].relocTable[j].label);
 						exit(1);
 					}
 				}
 				else{
-					for (int s = 0; s < combiner.symTableSize; s++){
-						if (!(strcmp(files[i].symbolTable[small].label,files[i].relocTable[j].label))){
-							printf("THIS IS S: %d\n", s);
-							small = s;
+					int small = 0;
+					for (int k = 0; k < combiner.symTableSize; k++) {
+						if (strcmp(combiner.symTable[k].label, files[i].relocTable[j].label) == 0) {
+							printf("THIS IS K: %d\n", k);
+							small = k;
 							break;
 						}
-					}
-					if (small == files[i].symbolTableSize) exit(1);
-
-				}
-				
-					if (!strcmp(combiner.symTable[k].label, files[i].relocTable[j].label)){
-						if(combiner.symTable[k].location == 'T'){
-							relocoff = combiner.symTable[k].offset;
-                            printf("this is offset: %d+++++++++++++++++++\n", relocoff);
+						if (small == combiner.symTableSize) exit(1);
+						if (files[i].symbolTable[small].location == 'D'){
+							if (!strcmp(files[i].relocTable[j].inst,".fill")){
+								files[i].data[files[i].relocTable[j].offset] += combiner.symTable[big].offset - (files[i].textSize + (files[i].symbolTable[small].offset & 0xFFFF));
+								combiner.data[files[i].relocTable[j].offset] = files[i].data[files[i].relocTable[j].offset];
+							}
+							else{
+								files[i].text[files[i].relocTable[j].offset] += combiner.symTable[big].offset - (files[i].textSize + (files[i].symbolTable[small].offset & 0xFFFF));
+								combiner.text[files[i].relocTable[j].offset] = files[i].text[files[i].relocTable[j].offset];
+							}
 						}
-						else if(combiner.symTable[k].location == 'D'){
-                            printf("IN THE D SECITOSDJBHB: %d and %d",combiner.symTable[k].offset, combiner.textSize );
-							relocoff = combiner.symTable[k].offset + combiner.textSize;
-                            printf("this is offset IN d: %d++++++++++++++++++++\n", relocoff);
+						else{
+							if (!strcmp(files[i].relocTable[j].inst,".fill")){
+								files[i].data[files[i].relocTable[j].offset] += combiner.symTable[big].offset - (files[i].symbolTable[small].offset & 0xFFFF);
+								combiner.data[files[i].relocTable[j].offset] = files[i].data[files[i].relocTable[j].offset];
+							}
+							else{
+								files[i].text[files[i].relocTable[j].offset] += combiner.symTable[big].offset - (files[i].symbolTable[small].offset & 0xFFFF);
+								combiner.text[files[i].relocTable[j].offset] = files[i].text[files[i].relocTable[j].offset];
+							}
 						}
 					}
 				}
 			}
-			else{ // LOCAL
+			// for (int k = 0; k < combiner.symTableSize; k++){
+			// 	if (!strcmp(combiner.symTable[k].label, files[i].relocTable[j].label)){
+			// 		if(combiner.symTable[k].location == 'T'){
+			// 			relocoff = combiner.symTable[k].offset;
+			// 			printf("this is offset: %d+++++++++++++++++++\n", relocoff);
+			// 		}
+			// 		else if(combiner.symTable[k].location == 'D'){
+			// 			printf("IN THE D SECITOSDJBHB: %d and %d",combiner.symTable[k].offset, combiner.textSize );
+			// 			relocoff = combiner.symTable[k].offset + combiner.textSize;
+			// 			printf("this is offset IN d: %d++++++++++++++++++++\n", relocoff);
+			// 		}
+			// 	}
+			// }
+			else { // LOCAL
+				int relocoff = 0;
 				int offloc = (!strcmp(files[i].relocTable[j].inst, ".fill")) ? files[i].data[files[i].relocTable[j].offset] : files[i].text[files[i].relocTable[j].offset] & 0xFFFF;
 				if (offloc < files[i].textSize){
 					relocoff = offloc + files[i].textStartingLine;
 				}
-				else{
+				else {
 					printf("in the d\n");
 					// printf("THESE ARE COMPONENTS: %d; %d; %d; %d\n");
 					// files[i].data[files[i].relocTable[j].offset] += (combiner.textSize - files[i].textSize) + files[i].dataStartingLine;
 					relocoff = offloc + files[i].dataStartingLine - files[i].textSize;
 				}
+				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] += relocoff - (combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF);
 			}
-			if 
+
 		}
 	}
 
+		//print to file
+	for(int i = 0; i < combiner.textSize; ++i){
+		fprintf(outFilePtr, "%d\n", combiner.text[i]);
+	}
+	for(int j = 0; j < combiner.dataSize; ++j){
+        printf("this is i and j: %d and %d\n", i , j);
+        printf("%d\n", combiner.data[j]);
+		fprintf(outFilePtr, "%d\n", combiner.data[j]);
+	}
+
+	fclose(outFilePtr);
+	return(0);
 } // main
