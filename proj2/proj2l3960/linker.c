@@ -223,14 +223,29 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	for (int i = 0, din = 0, tin = 0; i < argc - 2; i++){
-		for(int j = 0; j < files[i].textSize; ++j){
-			combiner.text[tin++] = files[i].text[j];
+	for (int tsize = 0, dsize = 0, k = 0; k < argc - 2; k++){
+		for (int i = 0; i < files[k].textSize; i++)
+		{
+			combiner.text[tsize + i] = files[k].text[i];
+			printf("THIS IS: %d\n", combiner.text[tsize + i]);
 		}
-		for(int k = 0; k < files[i].dataSize; ++k){
-			combiner.data[din++] = files[i].data[k];
-		}	
+		for (int i = 0; i < files[k].dataSize; i++)
+		{
+			combiner.data[dsize + i] = files[k].data[i];
+			printf("this is i and j: %d and %d\n", i, j);
+			printf("THIS IS DATA [%d]: %d\n", i, files[k].data[i]);
+		}
+		tsize += files[k].textSize;
+		dsize += files[k].dataSize;
 	}
+	// for (int i = 0, din = 0, tin = 0; i < argc - 2; i++){
+	// 	for(int j = 0; j < files[i].textSize; ++j){
+	// 		combiner.text[tin++] = files[i].text[j];
+	// 	}
+	// 	for(int k = 0; k < files[i].dataSize; ++k){
+	// 		combiner.data[din++] = files[i].data[k];
+	// 	}	
+	// }
 
     printf("%d %d %d %d\n", combiner.textSize, combiner.dataSize, combiner.symTableSize, combiner.relocTableSize);
 	for (int i =0; i < combiner.symTableSize; i++){
@@ -286,7 +301,6 @@ int main(int argc, char *argv[])
 			}
 			unsigned short int replace = 0;
 			if(!strcmp(files[i].relocTable[j].inst, ".fill")){
-				// dataStartingLine goes too far
 				combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize] = relocoff;
                 printf("in the .fill %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
 			}
@@ -303,6 +317,31 @@ int main(int argc, char *argv[])
             printf("THIS IS adter: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
 		}
 	}
+
+	// for (int tsize = 0, dsize = 0, k = 0; k < argc - 2; k++){
+	// 	for (int i = 0; i < files[k].textSize; i++)
+	// 	{
+	// 		combiner.text[tsize + i] = files[k].text[i];
+	// 		printf("THIS IS: %d\n", combiner.text[tsize + i]);
+	// 	}
+	// 	for (int i = 0; i < files[k].dataSize; i++)
+	// 	{
+	// 		combiner.data[dsize + i] = files[k].data[i];
+	// 		printf("this is i and j: %d and %d\n", i, j);
+	// 		printf("THIS IS DATA [%d]: %d\n", i, files[k].data[i]);
+	// 	}
+	// 	tsize += files[k].textSize;
+	// 	dsize += files[k].dataSize;
+	// }
+	// for (int i = 0, din = 0, tin = 0; i < argc - 2; i++){
+	// 	for(int j = 0; j < files[i].textSize; ++j){
+	// 		combiner.text[tin++] = files[i].text[j];
+	// 	}
+	// 	for(int k = 0; k < files[i].dataSize; ++k){
+	// 		combiner.data[din++] = files[i].data[k];
+	// 	}	
+	// }
+
 		//print to file
 	for(int i = 0; i < combiner.textSize; ++i){
 		fprintf(outFilePtr, "%d\n", combiner.text[i]);
