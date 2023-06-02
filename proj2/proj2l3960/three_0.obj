@@ -1,0 +1,19 @@
+7 3 3 5
+8454151
+8650752
+23527424
+29360128
+12648455
+8519689
+25165824
+3
+-1
+0
+Neg1 D 1
+File2 U 0
+Stack U 0
+0 lw data
+1 lw File2
+4 sw data
+5 lw load
+2 .fill Stack

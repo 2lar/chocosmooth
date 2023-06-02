@@ -1,0 +1,17 @@
+7 2 2 5
+8585216
+1638401
+12648448
+8585224
+5832705
+14221312
+24379392
+0
+-2
+File3 D 0
+Stack U 0
+0 lw Neg1
+2 sw Stack
+3 lw neg2
+5 sw Stack
+0 .fill start

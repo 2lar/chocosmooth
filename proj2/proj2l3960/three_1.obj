@@ -1,0 +1,16 @@
+6 2 3 4
+8519686
+1114113
+12648448
+8650752
+23461888
+25034752
+-1
+0
+File2 D 1
+Stack U 0
+File3 U 0
+0 lw neg1
+2 sw Stack
+3 lw File3
+1 .fill start
