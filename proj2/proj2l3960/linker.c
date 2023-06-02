@@ -149,6 +149,7 @@ int main(int argc, char *argv[])
 	//    Happy coding!!!
 
 	CombinedFiles combiner;
+	SymbolTableEntry Utable[MAXSIZE];
 	combiner.symTableSize = 0;
 	combiner.textSize = 0;
 	combiner.dataSize = 0;
@@ -156,7 +157,6 @@ int main(int argc, char *argv[])
 	for (int i = 0, j = 0; j < argc - 2; j++) {
 		files[j].textStartingLine = combiner.textSize;
 		for (int  a = 0; a < files[j].textSize; a++, i++) {
-			
 			combiner.text[i] = files[j].text[a];
 			combiner.textSize++;
 		}
@@ -169,8 +169,7 @@ int main(int argc, char *argv[])
 			combiner.dataSize++;
 		}
 	}
-
-	SymbolTableEntry Utable[MAXSIZE];
+	
 	int tempdata = 0, temptext = 0, uind = 0;
     for (int i = 0; i < argc - 2; i++){
         for (int j = 0; j < files[i].symbolTableSize; j++){
@@ -256,7 +255,7 @@ int main(int argc, char *argv[])
 		for (int j = 0; j < files[i].relocationTableSize; j++){
 			int relocoff = 0;
 			if (isupper(files[i].relocTable[j].label[0])){ //GLOBAL
-				if(!strcmp(files[i].relocTable[j].label, "Stack")){
+				if (!strcmp(files[i].relocTable[j].label, "Stack")){
 					relocoff = combiner.textSize + combiner.dataSize;
 					if(!strcmp(files[i].relocTable[j].inst, ".fill")){
 						printf("in the stack fill\n");
@@ -285,7 +284,15 @@ int main(int argc, char *argv[])
 						}
 					}
 				}
-			}
+				if(!strcmp(files[i].relocTable[j].inst, ".fill")){
+					combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize] = relocoff;
+					printf("in the .fill %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
+				}
+				else{ //LW AND SW
+					printf("this is else %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
+					printf("replcacefsdhjfvs: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
+					combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] = combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] - (combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF) + relocoff;
+				}			}
 			else{ // LOCAL
 				int offloc = (!strcmp(files[i].relocTable[j].inst, ".fill")) ? files[i].data[files[i].relocTable[j].offset] : files[i].text[files[i].relocTable[j].offset] & 0xFFFF;
 				if (offloc < files[i].textSize){
@@ -297,18 +304,16 @@ int main(int argc, char *argv[])
 					// files[i].data[files[i].relocTable[j].offset] += (combiner.textSize - files[i].textSize) + files[i].dataStartingLine;
 					relocoff = offloc + files[i].dataStartingLine - files[i].textSize;
 				}
+				if(!strcmp(files[i].relocTable[j].inst, ".fill")){
+					combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize] = relocoff;
+					printf("in the .fill %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
+				}
+				else{ //LW AND SW
+					printf("this is else %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
+					printf("replcacefsdhjfvs: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
+					combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] = combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] - (combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF) + relocoff;
+				}
 			}
-			if(!strcmp(files[i].relocTable[j].inst, ".fill")){
-				combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize] = relocoff;
-                printf("in the .fill %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
-			}
-			else{ //LW AND SW
-                printf("this is else %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
-                printf("replcacefsdhjfvs: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
-				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] = combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] - (combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF) + relocoff;
-			}
-            printf("THIS AFTERE: %d\n", files[i].text[files[i].relocTable[j].offset]);
-            printf("THIS IS adter: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
 		}
 	}
 
