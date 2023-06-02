@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define MAXSIZE 300
 #define MAXLINELENGTH 1000
@@ -187,9 +188,16 @@ int main(int argc, char *argv[])
 				Utable[uind].location = files[i].symbolTable[j].location;
 				strcpy(Utable[uind].label, files[i].symbolTable[j].label);
 				uind++;
+				for (int i = 0; i < uind; i++){
+					for (int j = 0; j < combiner.symTableSize; j++){
+						if (!strcmp(Utable[i].label, combiner.symTable[j].label)){
+							break;
+						}
+						exit(1); // this is an undefined label found
+					}
+				}
 			}
 			else{
-				
 				if (files[i].symbolTable[j].location == 'D'){
 					printf("THIS IS THE COMPONENTS: %d; %d; %d\n", files[i].symbolTable[j].offset, tempdata, combiner.textSize);
 					printf("THIS IS OFFSETS: %d\n", combiner.symTable[combiner.symTableSize].offset);
@@ -211,17 +219,7 @@ int main(int argc, char *argv[])
 		temptext += files[i].textSize;
     }
 
-	for(int i = 0, def = 0; i < uind; i++){
-		for(int j = 0; j < combiner.symTableSize; j++){
-			if(!strcmp(Utable[i].label, combiner.symTable[j].label)){
-				def = 1;
-			}
-		}
-		if(!def){
-			printf("Undefined label");
-			exit(1);
-		}
-	}
+	
 
 	for (int tsize = 0, dsize = 0, k = 0; k < argc - 2; k++){
 		for (int i = 0; i < files[k].textSize; i++)
@@ -264,7 +262,7 @@ int main(int argc, char *argv[])
 				continue;
 			}
 			
-			if ((files[i].relocTable[j].label[0] <= 'Z' && files[i].relocTable[j].label[0] >= 'A')){ //GLOBAL
+			if (isupper(files[i].relocTable[j].label[0])){ //GLOBAL
 				for (int k = 0; k < combiner.symTableSize; k++){
 					if (!strcmp(combiner.symTable[k].label, files[i].relocTable[j].label)){
 						if(combiner.symTable[k].location == 'T'){
