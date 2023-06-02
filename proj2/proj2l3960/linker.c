@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < argc - 2; i++){
         for (int j = 0; j < files[i].symbolTableSize; j++){
 			for (int a = 0; a < combiner.symTableSize; a++){
-				if (!strcmp(combiner.symTable[a].label, files[i].symbolTable[j].label) && files[i].symbolTable[j].location != 'U'){
+				if (!strcmp(combiner.symTable[a].label, files[i].symbolTable[j].label) && combiner.symTable[a].location != 'U'){
 					printf("Duplicated defined global label.\n");
 					exit(1);
 				}  
@@ -238,17 +238,9 @@ int main(int argc, char *argv[])
 		tsize += files[k].textSize;
 		dsize += files[k].dataSize;
 	}
-	// for (int i = 0, din = 0, tin = 0; i < argc - 2; i++){
-	// 	for(int j = 0; j < files[i].textSize; ++j){
-	// 		combiner.text[tin++] = files[i].text[j];
-	// 	}
-	// 	for(int k = 0; k < files[i].dataSize; ++k){
-	// 		combiner.data[din++] = files[i].data[k];
-	// 	}	
-	// }
 
     printf("%d %d %d %d\n", combiner.textSize, combiner.dataSize, combiner.symTableSize, combiner.relocTableSize);
-	for (int i =0; i < combiner.symTableSize; i++){
+	for (int i = 0; i < combiner.symTableSize; i++){
 		printf("THIS IS offset at %d: %d at %s\n", i, combiner.symTable[i].offset, combiner.symTable[i].label);
 	}
 
@@ -299,59 +291,27 @@ int main(int argc, char *argv[])
 					relocoff = offloc + files[i].dataStartingLine - files[i].textSize;
 				}
 			}
-			unsigned short int replace = 0;
 			if(!strcmp(files[i].relocTable[j].inst, ".fill")){
 				combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize] = relocoff;
                 printf("in the .fill %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
 			}
-			else{ // lw and sw instructions
+			else{ //LW AND SW
                 printf("this is else %d\n", combiner.data[files[i].relocTable[j].offset + files[i].dataStartingLine - combiner.textSize]);
-				replace = combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF;
-                printf("replcacefsdhjfvs: %d\n", replace);
-                printf("replcacefsdhjfvs: %d\n", relocoff);
                 printf("replcacefsdhjfvs: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
-				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] -= replace;
-				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] += relocoff;
+				combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] = combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] - (combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine] & 0xFFFF) + relocoff;
 			}
             printf("THIS AFTERE: %d\n", files[i].text[files[i].relocTable[j].offset]);
             printf("THIS IS adter: %d\n", combiner.text[files[i].relocTable[j].offset + files[i].textStartingLine]);
 		}
 	}
 
-	// for (int tsize = 0, dsize = 0, k = 0; k < argc - 2; k++){
-	// 	for (int i = 0; i < files[k].textSize; i++)
-	// 	{
-	// 		combiner.text[tsize + i] = files[k].text[i];
-	// 		printf("THIS IS: %d\n", combiner.text[tsize + i]);
-	// 	}
-	// 	for (int i = 0; i < files[k].dataSize; i++)
-	// 	{
-	// 		combiner.data[dsize + i] = files[k].data[i];
-	// 		printf("this is i and j: %d and %d\n", i, j);
-	// 		printf("THIS IS DATA [%d]: %d\n", i, files[k].data[i]);
-	// 	}
-	// 	tsize += files[k].textSize;
-	// 	dsize += files[k].dataSize;
-	// }
-	// for (int i = 0, din = 0, tin = 0; i < argc - 2; i++){
-	// 	for(int j = 0; j < files[i].textSize; ++j){
-	// 		combiner.text[tin++] = files[i].text[j];
-	// 	}
-	// 	for(int k = 0; k < files[i].dataSize; ++k){
-	// 		combiner.data[din++] = files[i].data[k];
-	// 	}	
-	// }
-
-		//print to file
-	for(int i = 0; i < combiner.textSize; ++i){
-		fprintf(outFilePtr, "%d\n", combiner.text[i]);
+	for (int i = 0; i < combiner.textSize; i++)
+	{
+		fprintf(outFilePtr,"%d\n",combiner.text[i]);
+		// fprintf(outFilePtr,"%d\n", 999);
 	}
-	for(int j = 0; j < combiner.dataSize; ++j){
-        printf("this is i and j: %d and %d\n", i , j);
-        printf("%d\n", combiner.data[j]);
-		fprintf(outFilePtr, "%d\n", combiner.data[j]);
+	for (int i = 0; i < combiner.dataSize; i++)
+	{
+		fprintf(outFilePtr,"%d\n",combiner.data[i]);
 	}
-
-	fclose(outFilePtr);
-	return(0);
 } // main
