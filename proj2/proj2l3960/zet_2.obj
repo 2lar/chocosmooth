@@ -1,3 +1,21 @@
-6 3 5 8
-8519680
-8585216
+6 4 2 8
+8519686
+8585224
+8716293
+8650758
+12648455
+12779529
+9
+99
+11
+2
+Mars D 2
+Earth D 3
+0 lw sun
+1 lw Mars
+2 lw last
+3 lw sun
+4 sw moop
+5 sw Earth
+0 .fill Earth
+3 .fill start

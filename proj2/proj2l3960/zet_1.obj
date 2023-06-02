@@ -1,10 +1,20 @@
-2 3 2 2
-12845058
+5 4 4 6
+8650759
+12845061
+12779520
+8650760
 25165824
 765
 0
 15
+3
 Moon D 1
 Ice D 2
-0 sw elect
+Lost D 3
+Stack U 0
+0 lw Ice
+1 sw elect
+2 sw Stack
+3 lw Lost
 1 .fill spin
+3 .fill march

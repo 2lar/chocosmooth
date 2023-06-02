@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         for (int j = 0; j < files[i].symbolTableSize; j++){
 			for (int a = 0; a < combiner.symTableSize; a++){
 				if (!strcmp(combiner.symTable[a].label, files[i].symbolTable[j].label) && files[i].symbolTable[j].location != 'U'){
-					printf("Duplicated defined global label.\n");
+					printf("Duplicated defined global label. %s\n", files[i].symbolTable[j].label);
 					exit(1);
 				}  
             }
